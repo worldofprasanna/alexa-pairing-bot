@@ -35,8 +35,8 @@ var startSearchHandlers = {
       });
 
       res.on('end', function () {
-        var url = response['url'];
-        httpGet(url, function (response) {
+        var url = JSON.parse(response).url;
+        updateSlack(url, function (response) {
 
           console.log('Inside httpGet Response callback');
           var cardTitle = 'project url';
@@ -57,9 +57,37 @@ var startSearchHandlers = {
 
 var updateProjectHandler = {
   'updateProject': function(){
-    var cardTitle = 'project url';
-    var cardContent = 'URL: ';
-    alexa.emit(':tellWithCard', 'prasanna', cardTitle, cardContent);
+    var img = this.event.request.intent.slots.img.value;
+    var options = {
+      host: 'cbsw88isjl.execute-api.us-west-2.amazonaws.com',
+      path: '/prod/spark-create-blog',
+      method: 'POST'
+    };
+
+    var req = https.request(options, function (res) {
+
+      console.log('Invoking lambda to change background');
+      var response = '';
+
+      res.on('data', function (d) {
+        response += d;
+        console.log('Response from lambda:', response)
+      });
+
+      res.on('end', function () {
+        var cardTitle = 'project url';
+        var cardContent = 'URL: ';
+        alexa.emit(':tellWithCard', 'Succesfully Updated', cardTitle, cardContent);
+      });
+
+    });
+    var data = '{"event": {"action":"change-background","value":"'+img+'"}}';
+    req.write(data);
+    req.end();
+    req.on('error', function (e) {
+      console.error(e);
+    });
+
   }
 };
 
@@ -73,7 +101,7 @@ exports.handler = function (event, context, callback) {
 };
 
 // Create a web request and handle the response.
-function httpGet(url, callback) {
+function updateSlack(url, callback) {
   var options = {
     host: 'hooks.slack.com',
     path: '/services/T04N70K4J/B59FXUYS1/wO1EBlyrQVHYxfXQTELa5hc9',
