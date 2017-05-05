@@ -1,0 +1,6 @@
+.idea/
+LICENSE.txt
+speechAssets/
+src/node_modules/*
+src/pairingbot.zip
+event-samples/event.js
