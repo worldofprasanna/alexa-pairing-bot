@@ -16,22 +16,50 @@ var states = {
 var startSearchHandlers = {
   'getProjectName': function () {
     console.log('Inside getProjectName');
+    var projectName = this.event.request.intent.slots.project.value;
+    console.log('Project URL :', projectName);
+    var options = {
+      host: 'cbsw88isjl.execute-api.us-west-2.amazonaws.com',
+      path: '/prod/spark-create-blog',
+      method: 'POST'
+    };
 
+    var req = https.request(options, function (res) {
 
-    httpGet(location, function (response) {
+      console.log('Invoking lambda to get URL');
+      var response = '';
 
-      console.log('Inside httpGet Response callback');
-      // Parse the response into a JSON object ready to be formatted.
-      var projectName = this.event.request.intent.slots.project.value;
-      console.log('Project URL :', projectName);
+      res.on('data', function (d) {
+        response += d;
+        console.log('Response from lambda:', response)
+      });
 
+      res.on('end', function () {
+        var url = response['url'];
+        httpGet(url, function (response) {
 
+          console.log('Inside httpGet Response callback');
+          var cardTitle = 'project url';
+          var cardContent = 'URL: ' + url;
+          alexa.emit(':tellWithCard', url, cardTitle, cardContent);
+        });
+      });
 
-      // Check if we have correct data, If not create an error speech out to try again.
-      var cardTitle = 'project url';
-      var cardContent = 'URL: ' + response;
-      alexa.emit(':tellWithCard', response, cardTitle, cardContent);
     });
+    var data = '{"event": {"action":"create-website","value":"'+projectName+'"}}';
+    req.write(data);
+    req.end();
+    req.on('error', function (e) {
+      console.error(e);
+    });
+  }
+};
+
+var updateProjectHandler = {
+  'updateProject': function(){
+    var cardTitle = 'project url';
+    var cardContent = 'URL: ';
+    alexa.emit(':tellWithCard', 'prasanna', cardTitle, cardContent);
   }
 };
 
@@ -40,11 +68,12 @@ exports.handler = function (event, context, callback) {
   alexa = Alexa.handler(event, context);
   this.event = event;
   alexa.registerHandlers(startSearchHandlers);
+  alexa.registerHandlers(updateProjectHandler);
   alexa.execute();
 };
 
 // Create a web request and handle the response.
-function httpGet(project, callback) {
+function httpGet(url, callback) {
   var options = {
     host: 'hooks.slack.com',
     path: '/services/T04N70K4J/B59FXUYS1/wO1EBlyrQVHYxfXQTELa5hc9',
@@ -62,11 +91,10 @@ function httpGet(project, callback) {
     });
 
     res.on('end', function () {
-      callback("www.google.com");
+      callback(url);
     });
-
   });
-  payload='{"channel": "#spark-alexa-test", "username": "pairingbot", "text": "www.google.com"}';
+  payload='{"channel": "#spark-alexa-test", "username": "pairingbot", "text": "'+url+'"}';
   req.write(payload);
   req.end();
   req.on('error', function (e) {
