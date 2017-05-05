@@ -71,12 +71,9 @@ var updateProjectHandler = {
 
       res.on('data', function (d) {
         response += d;
-        console.log('Response from lambda:', response)
-      });
-
-      res.on('end', function () {
-        var cardTitle = 'project url';
-        var cardContent = 'URL: ';
+        var cardTitle = 'Website Updation';
+        var cardContent = 'Website Update successfully';
+        console.log('Response from lambda:', response);
         alexa.emit(':tellWithCard', 'Succesfully Updated', cardTitle, cardContent);
       });
 
@@ -86,6 +83,9 @@ var updateProjectHandler = {
     req.end();
     req.on('error', function (e) {
       console.error(e);
+      var cardTitle = 'Wesite Updation failed';
+      var cardContent = 'Couldn t update website';
+      alexa.emit(':tellWithCard', 'Updation failed', cardTitle, cardContent);
     });
 
   }
@@ -100,7 +100,6 @@ exports.handler = function (event, context, callback) {
   alexa.execute();
 };
 
-// Create a web request and handle the response.
 function updateSlack(url, callback) {
   var options = {
     host: 'hooks.slack.com',
