@@ -61,10 +61,10 @@ var updateProjectHandler = {
 
       res.on('data', function (d) {
         response += d;
-        var cardTitle = 'Website Updation';
-        var cardContent = 'Website Update successfully';
+        var cardTitle = 'Website Background';
+        var cardContent = 'Website Background Updated successfully';
         console.log('Response from lambda:', response);
-        alexa.emit(':tellWithCard', 'Succesfully Updated', cardTitle, cardContent);
+        alexa.emit(':tellWithCard', 'Website Background Succesfully Updated', cardTitle, cardContent);
       });
 
     });
@@ -72,9 +72,9 @@ var updateProjectHandler = {
     req.end(data);
     req.on('error', function (e) {
       console.error(e);
-      var cardTitle = 'Website Updation failed';
-      var cardContent = 'Couldn t update website';
-      alexa.emit(':tellWithCard', 'Updation failed', cardTitle, cardContent);
+      var cardTitle = 'Website Background Updation failed';
+      var cardContent = 'Couldn t update website Background';
+      alexa.emit(':tellWithCard', 'Background Updation failed', cardTitle, cardContent);
     });
 
   }
@@ -82,7 +82,7 @@ var updateProjectHandler = {
 
 var updateProjectBorderHandler = {
   'updateProjectBorder': function(){
-    var border = this.event.request.intent.slots.border.value;
+    var border = this.event.request.intent.slots.borderstyle.value;
     var options = {
       host: 'cbsw88isjl.execute-api.us-west-2.amazonaws.com',
       path: '/prod/spark-create-blog',
