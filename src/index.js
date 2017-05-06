@@ -30,7 +30,7 @@ var startSearchHandlers = {
 
           var cardTitle = 'project url';
           var cardContent = 'URL: ' + url;
-          alexa.emit(':tellWithCard', url, cardTitle, cardContent);
+          alexa.emit(':tellWithCard', 'Successfully created the website and URL has been sent to slack, cardTitle', cardContent);
         });
       });
 
@@ -80,12 +80,47 @@ var updateProjectHandler = {
   }
 };
 
+var updateProjectBorderHandler = {
+  'updateProjectBorder': function(){
+    var border = this.event.request.intent.slots.border.value;
+    var options = {
+      host: 'cbsw88isjl.execute-api.us-west-2.amazonaws.com',
+      path: '/prod/spark-create-blog',
+      method: 'POST'
+    };
+
+    var req = https.request(options, function (res) {
+
+      console.log('Invoking lambda to change website border');
+      var response = '';
+
+      res.on('data', function (d) {
+        response += d;
+        var cardTitle = 'Website Border updation';
+        var cardContent = 'Website Border Updated successfully';
+        console.log('Response from lambda:', response);
+        alexa.emit(':tellWithCard', 'Website Border Succesfully Updated', cardTitle, cardContent);
+      });
+
+    });
+    var data = 'change-border,'+border;
+    req.end(data);
+    req.on('error', function (e) {
+      console.error(e);
+      var cardTitle = 'Website Border Updation failed';
+      var cardContent = 'Couldn t update Website Border';
+      alexa.emit(':tellWithCard', 'Website Border Updation failed', cardTitle, cardContent);
+    });
+  }
+};
+
 exports.handler = function (event, context, callback) {
   console.log('Started in function');
   alexa = Alexa.handler(event, context);
   this.event = event;
   alexa.registerHandlers(startSearchHandlers);
   alexa.registerHandlers(updateProjectHandler);
+  alexa.registerHandlers(updateProjectBorderHandler);
   alexa.execute();
 };
 
