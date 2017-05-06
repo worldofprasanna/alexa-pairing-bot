@@ -1,17 +1,7 @@
 var Alexa = require('alexa-sdk');
 var https = require('https');
-
-var location = "Seattle";
-
-var output = "";
-
 var event;
-
 var alexa;
-var states = {
-  SEARCHMODE: '_SEARCHMODE',
-  TOPFIVE: '_TOPFIVE',
-};
 
 var startSearchHandlers = {
   'getProjectName': function () {
@@ -36,9 +26,8 @@ var startSearchHandlers = {
 
       res.on('end', function () {
         var url = JSON.parse(response).url;
-        updateSlack(url, function (response) {
+        updateSlack(url, projectName, function (response) {
 
-          console.log('Inside httpGet Response callback');
           var cardTitle = 'project url';
           var cardContent = 'URL: ' + url;
           alexa.emit(':tellWithCard', url, cardTitle, cardContent);
@@ -46,8 +35,9 @@ var startSearchHandlers = {
       });
 
     });
-    var data = '{"event": {"action":"create-website","value":"'+projectName+'"}}';
-    req.write(data);
+    var data = {action:"create-website",value:projectName};
+    req.write('create-website,'+projectName);
+    console.log(JSON.stringify(data));
     req.end();
     req.on('error', function (e) {
       console.error(e);
@@ -78,12 +68,11 @@ var updateProjectHandler = {
       });
 
     });
-    var data = '{"event": {"action":"change-background","value":"'+img+'"}}';
-    req.write(data);
-    req.end();
+    var data = 'change-background,'+img;
+    req.end(data);
     req.on('error', function (e) {
       console.error(e);
-      var cardTitle = 'Wesite Updation failed';
+      var cardTitle = 'Website Updation failed';
       var cardContent = 'Couldn t update website';
       alexa.emit(':tellWithCard', 'Updation failed', cardTitle, cardContent);
     });
@@ -100,7 +89,7 @@ exports.handler = function (event, context, callback) {
   alexa.execute();
 };
 
-function updateSlack(url, callback) {
+function updateSlack(url, projectName, callback) {
   var options = {
     host: 'hooks.slack.com',
     path: '/services/T04N70K4J/B59FXUYS1/wO1EBlyrQVHYxfXQTELa5hc9',
@@ -121,7 +110,7 @@ function updateSlack(url, callback) {
       callback(url);
     });
   });
-  payload='{"channel": "#spark-alexa-test", "username": "pairingbot", "text": "'+url+'"}';
+  payload='{"channel": "#spark-alexa-test", "username": "pairingbot", "text": " URL for '+projectName+' is '+url+'"}';
   req.write(payload);
   req.end();
   req.on('error', function (e) {
